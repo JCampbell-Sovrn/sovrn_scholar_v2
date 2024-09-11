@@ -1,449 +1,14 @@
-// import React, { useContext, useEffect, useRef, useState } from 'react'
-// import { ExtensionContext40 } from '@looker/extension-sdk-react'
-// import {
-//   Card,
-//   CardContent,
-//   Heading,
-//   Box,
-//   Button,
-//   InputText,
-//   Space,
-//   ComponentsProvider,
-//   Text,
-//   ButtonOutline,
-//   IconButton,
-//   Icon,
-//   Drawer,
-// } from '@looker/components'
-
-// /**
-//  * A simple component that uses the Looker SDK through the extension sdk to display a customized hello message.
-//  */
-// interface Message {
-//   sender: 'user' | 'system';
-//   text: string;
-// }
-
-// export const SovrnScholar: React.FC = () => {
-//   const { coreSDK } = useContext(ExtensionContext40)
-//   const [message, setMessage] = useState('')
-//   const [inputValue, setInputValue] = useState('')
-//   const [messages, setMessages] = useState<Message[]>([])
-//   const messagesEndRef = useRef<HTMLDivElement | null>(null)
-
-//   useEffect(() => {
-//     const getMe = async () => {
-//       try {
-//         const me = await coreSDK.ok(coreSDK.me())
-//         setMessage(`Hello, ${me.display_name}`)
-//       } catch (error) {
-//         console.error(error)
-//         setMessage('An error occurred while getting information about me!')
-//       }
-//     }
-//     getMe()
-//   }, [coreSDK])
-
-//   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     setInputValue(event.target.value);
-//   };
-
-//   useEffect(() => {
-//     if (messagesEndRef.current) {
-//       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-//     }
-//   }, [messages]);
-
-//   const handleButtonClick = async () => {
-//     console.log('Creating SQL query...')
-    
-//     // Adding the user input to the chatbox before sending the query
-//     setMessages((prevMessages) => [
-//       ...prevMessages,
-//       { sender: 'user', text: inputValue },
-//     ]);
-    
-//     try {
-//       const query = await coreSDK.ok(coreSDK.create_sql_query({
-//         "connection_name": "databricks_anayltics",
-//         // "sql": "SELECT 1",  // Simple query for testing
-//         "sql":`SELECT ai_query('agents_business_intelligence-llm_data-v104_rag_v2', request => named_struct('messages', ARRAY(named_struct('role', 'user', 'content', '${inputValue}'))), returnType => 'STRUCT<choices:ARRAY<STRING>>')`,
-//         "vis_config": {}
-//       }))
-  
-//       if (query && query.slug) {
-//         console.log(query)
-//         console.log('Query slug:'+ query.slug)
-        
-//         // Simulate querying results from Looker
-//         let result = await coreSDK.ok(coreSDK.run_sql_query(
-//           query.slug, 'txt'))
-
-//         console.log('query completed')
-        
-//         // Parse the result and display it in the chatbox
-//         // const responseText = result?.[0]?.choices?.[0]?.toString() || 'No response available';
-//         // console.log(result?[0]?.choices?.[0]?.toString()
-//         // const responseText = result?[0]?.choices?.[0]?.toString()
-//         console.log(result)
-//         const matches = result.match(/"([^"]*)"/g);
-//         const result_clean = matches.map(match => match.replace(/"/g, '')).join(' ');
-
-//         const responseText = result_clean || 'No response available';
-        
-
-        
-//         setMessages((prevMessages) => [
-//           ...prevMessages,
-//           { sender: 'system', text: responseText },
-//         ]);
-//       } else {
-//         console.log("fail");
-//         setMessages((prevMessages) => [
-//           ...prevMessages,
-//           { sender: 'system', text: 'An error occurred, please try again.' },
-//         ]);
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       setMessages((prevMessages) => [
-//         ...prevMessages,
-//         { sender: 'system', text: 'An error occurred while processing your request.' },
-//       ]);
-//     }
-    
-//     setInputValue('');
-//   };
-
-//   return (
-//     <ComponentsProvider
-//       themeCustomizations={{
-//         colors: { key: '#1A73E8' },
-//       }}
-//     >
-//       <Card raised width="70%" m="auto">
-//         <CardContent>
-//           <Heading textAlign="center" pb="medium">
-//             Sovrn Scholar - {message}
-//           </Heading>
-//           <Box mb="medium" height="600px" overflowY="auto">
-//             {messages.map((msg, index) => (
-//               <Box
-//                 key={index}
-//                 p="medium"
-//                 mb="small"
-//                 borderRadius="8px"
-//                 width="60%"
-//                 ml={msg.sender === 'user' ? 'auto' : 0}
-//                 mr={msg.sender === 'user' ? 0 : 'auto'}
-//                 backgroundColor={msg.sender === 'user' ? 'key' : 'inform'}
-//                 color="white"
-//                 textAlign={msg.sender === 'user' ? 'right' : 'left'}
-//               >
-//                 <Text>{msg.text}</Text>
-//               </Box>
-//             ))}
-//             <div ref={messagesEndRef} />
-//           </Box>
-//           <Box mb="medium">
-//             <InputText
-//               placeholder="Type your important question here..."
-//               width="100%"
-//               value={inputValue}
-//               onChange={handleInputChange}
-//             />
-//           </Box>
-//           <Box textAlign="center" mb="medium">
-//             <Button color='key' onClick={handleButtonClick}>
-//               Ask Sovrn Scholar
-//             </Button>
-//           </Box>
-//           <Space around>
-//             <Drawer content="Edit this for the sidebar">
-//               <Button >Sovrn Scholar Info</Button>
-//             </Drawer>
-//           </Space>
-//         </CardContent>
-//       </Card>
-//     </ComponentsProvider>
-//   );
-// }
-
-
-// import React, { useContext, useEffect, useRef, useState } from 'react'
-// import { ExtensionContext40 } from '@looker/extension-sdk-react'
-// import {Heading, Box, Button, InputText,
-//   ComponentsProvider, Text, IconButton, Flex} from '@looker/components'
-// import { School, Science, ChatBubble, Book, ThumbUp, ThumbDown } from '@styled-icons/material'
-
-// // Interface for chat messages
-// interface Message {
-//   sender: 'user' | 'system';
-//   text: string;
-//   name: string;
-//   timestamp: string;
-//   feedback?: 'up' | 'down' | null; // Optional feedback property
-// }
-
-// // Define the SovrnScholar component
-// export const SovrnScholar: React.FC = () => {
-//   const { coreSDK } = useContext(ExtensionContext40)
-//   const [message, setMessage] = useState('')
-//   const [inputValue, setInputValue] = useState('')
-//   const [messages, setMessages] = useState<Message[]>([])
-//   const messagesEndRef = useRef<HTMLDivElement | null>(null)
-//   const [isLoading, setIsLoading] = useState(false)
-//   const [userName, setUserName] = useState<string>('User') // Store the user's name
-
-//   useEffect(() => {
-//     const getMe = async () => {
-//       try {
-//         const me = await coreSDK.ok(coreSDK.me())
-//         setMessage(`Hello, ${me.display_name}`)
-//         setUserName(`${me.display_name}`) // Set the user's name here
-//       } catch (error) {
-//         console.error(error)
-//         setMessage('An error occurred while getting information about me!')
-//       }
-//     }
-//     getMe()
-//   }, [coreSDK])
-
-//   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     setInputValue(event.target.value);
-//   };
-
-//   useEffect(() => {
-//     if (messagesEndRef.current) {
-//       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-//     }
-//   }, [messages]);
-
-//   const handleButtonClick = async () => {
-//     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-//     // Add user message to chat
-//     setMessages((prevMessages) => [
-//       ...prevMessages,
-//       { sender: 'user', text: inputValue, name: userName, timestamp, feedback: null },
-//     ]);
-
-//     // Set loading state
-//     setIsLoading(true);
-
-//     try {
-//       // Replace this section with your Databricks logic
-//       const query = await coreSDK.ok(coreSDK.create_sql_query({
-//         "connection_name": "databricks_anayltics",
-//         "sql": `SELECT ai_query('agents_business_intelligence-llm_data-v104_rag_v2', request => named_struct('messages', ARRAY(named_struct('role', 'user', 'content', '${inputValue}'))), returnType => 'STRUCT<choices:ARRAY<STRING>>')`,
-//         "vis_config": {}
-//       }));
-
-//       let result = await coreSDK.ok(coreSDK.run_sql_query(query.slug, 'txt'));
-
-//       // Log the result to inspect its structure
-//       console.log("Raw query result:", result);
-
-//       // Improved JSON handling
-//       let resultClean = '';
-//       try {
-//         const parsedOuterResult = JSON.parse(result);
-//         const resultParsed = JSON.parse(parsedOuterResult);
-
-//         // Access the choices and clean up the response content
-//         if (resultParsed.choices) {
-//           resultClean = resultParsed.choices
-//             .map((choice: any) => choice.message?.content || 'No content')
-//             .join(' ')
-//             .trim();
-//         } else {
-//           resultClean = 'No response available from the AI query.';
-//         }
-
-//       } catch (jsonError) {
-//         console.warn('Failed to parse the JSON result, falling back to text handling.');
-
-//         // Fallback if the response isn't valid JSON
-//         resultClean = result
-//          .replace(/ai_query\(.*?\)/, '')  // Remove 'ai_query(...)'
-//           // .replace(/\)\),\s*STRUCT<choices:ARRAY<STRING>>\)\s*choices:index:\d+,message:role:assistant,content:/, '')
-//          .replace(/\s+/g, ' ')           // Replace multiple spaces
-//          .replace(/[\[\]{}"]/g, '')      // Remove brackets, quotes, etc.
-//           .trim();                        // Trim leading/trailing whitespace
-//       }
-
-//       // Clean up for display
-//       resultClean = resultClean || 'No meaningful response could be parsed.';
-
-//       // Add the system message to the chat as "Sovrn Scholar"
-//       setMessages((prevMessages) => [
-//         ...prevMessages,
-//         { sender: 'system', text: resultClean, name: 'Sovrn Scholar', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), feedback: null },
-//       ]);
-
-//     } catch (error) {
-//       console.error('Error occurred during SQL query execution:', error);
-
-//       // Add error message to the chat as "Sovrn Scholar"
-//       setMessages((prevMessages) => [
-//         ...prevMessages,
-//         { sender: 'system', text: 'An error occurred while processing your request.', name: 'Sovrn Scholar', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), feedback: null },
-//       ]);
-//     } finally {
-//       // Reset loading state
-//       setIsLoading(false);
-//     }
-
-//     // Clear input value
-//     setInputValue('');
-//   };
-
-//   // Handle thumbs up/down clicks
-//   const handleFeedback = (index: number, feedback: 'up' | 'down') => {
-//     setMessages((prevMessages) =>
-//       prevMessages.map((msg, i) =>
-//         i === index ? { ...msg, feedback } : msg
-//       )
-//     );
-//   };
-
-//   // Predefined questions
-//   const questions = [
-//     { text: 'What do our clients think of our Commerce Unified?', icon: <School size={30} /> },
-//     { text: 'What is the Sovrn Exchange?', icon: <Science size={30} /> },
-//     { text: 'What recommendations should I give a client who just adopted Ad Management?', icon: <ChatBubble size={30} /> },
-//     { text: "Are Sovrn's business priorities aligned with customer feedback?", icon: <Book size={30} /> },
-//   ];
-
-//   return (
-//     <ComponentsProvider
-//       themeCustomizations={{
-//         colors: { key: '#FFD42B' }, // Change to match the new yellow color
-//       }}
-//     >
-//       <Flex
-//         flexDirection="column"
-//         justifyContent="center"
-//         alignItems="center"
-//         height="100vh"
-//         backgroundColor="#DCD6CF"
-//       >
-//         <Box width="80%">
-//           <Heading textAlign="center" pb="medium">
-//             Sovrn Scholar - {message}
-//           </Heading>
-
-//           {/* Questions Buttons */}
-//           <Flex justifyContent="center" alignItems="center" mb="large">
-//             {questions.map((q, index) => (
-//               <Box
-//                 key={index}
-//                 p="large"
-//                 m="medium"
-//                 width="200px"
-//                 height="150px"
-//                 backgroundColor="#FFD42B"  // Updated color
-//                 borderRadius="10px"
-//                 display="flex"
-//                 flexDirection="column"
-//                 justifyContent="center"
-//                 alignItems="center"
-//                 //boxShadow="0px 4px 6px rgba(0,0,0,0.1)"
-//                 onClick={() => setInputValue(q.text)}
-//                 style={{ cursor: 'pointer' }}
-//               >
-//                 {q.icon}
-//                 <Text
-//                   mt="small"
-//                   textAlign="center"
-//                   fontWeight="bold"
-//                   fontSize="small"
-//                   color="black"
-//                 >
-//                   {q.text}
-//                 </Text>
-//               </Box>
-//             ))}
-//           </Flex>
-
-//           {/* Message history display */}
-//           <Box mb="large" height="300px" overflowY="auto" backgroundColor="white" borderRadius="8px" p="medium">
-//             {messages.map((msg, index) => (
-//               <Box
-//                 key={index}
-//                 p="medium"
-//                 mb="small"
-//                 borderRadius="8px"
-//                 width="60%"
-//                 ml={msg.sender === 'user' ? 'auto' : 0}
-//                 mr={msg.sender === 'user' ? 0 : 'auto'}
-//                 backgroundColor={msg.sender === 'user' ? '#FFD42B' : '#D3D3D3'} // User message: gold, System: grey
-//                 color="black"
-//                 textAlign={msg.sender === 'user' ? 'right' : 'left'}
-//                 //boxShadow="0 4px 8px rgba(0, 0, 0, 0.1)" // Adds depth perception
-//               >
-//                 {/* Display the name and timestamp */}
-//                 <Text fontWeight="bold" fontSize="small">{msg.name} - {msg.timestamp}</Text>
-//                 <Text fontWeight="medium" fontSize="medium">{msg.text}</Text>
-
-//                 {/* Thumbs up/down buttons for system responses */}
-//                 {msg.sender === 'system' && (
-//                   <Flex justifyContent="flex-end" mt="small">
-//                     <IconButton
-//                       icon={<ThumbUp size={24} />}
-//                       label="Thumbs Up"
-//                       onClick={() => handleFeedback(index, 'up')}
-//                       disabled={msg.feedback !== null}
-//                       size="medium"
-//                     />
-//                     <IconButton
-//                       icon={<ThumbDown size={24} />}
-//                       label="Thumbs Down"
-//                       onClick={() => handleFeedback(index, 'down')}
-//                       disabled={msg.feedback !== null}
-//                       ml="small"
-//                       size="medium"
-//                     />
-//                   </Flex>
-//                 )}
-
-//                 {/* Display feedback if already provided */}
-//                 {msg.feedback && (
-//                   <Text fontSize="small" mt="small">
-//                     {msg.feedback === 'up' ? 'You liked this response' : 'You disliked this response'}
-//                   </Text>
-//                 )}
-//               </Box>
-//             ))}
-//             <div ref={messagesEndRef} />
-//           </Box>
-
-//           {/* Input box and button */}
-//           <Box mb="medium">
-//             <InputText
-//               placeholder="Type your important question here..."
-//               width="100%"
-//               value={inputValue}
-//               onChange={handleInputChange}
-//             />
-//           </Box>
-
-//           <Box textAlign="center">
-//             <Button color="key" onClick={handleButtonClick} disabled={isLoading}>
-//               {isLoading ? 'Processing...' : 'Ask the Scholar'}
-//             </Button>
-//           </Box>
-//         </Box>
-//       </Flex>
-//     </ComponentsProvider>
-//   );
-// };
-
+// loading packages
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { ExtensionContext40 } from '@looker/extension-sdk-react'
-import {Heading, Box, Button, InputText,
-  ComponentsProvider, Text, IconButton, Flex} from '@looker/components'
-import { School, Science, ChatBubble, Book, ThumbUp, ThumbDown } from '@styled-icons/material'
+import { Heading, Box, Button, InputText, ComponentsProvider, Text, IconButton, Flex, FieldTextArea } from '@looker/components'
+import { School, Science, ChatBubble, Book, ThumbUp, ThumbDown, Send } from '@styled-icons/material'
+import {  PatchQuestionFill, Clipboard, StopCircleFill } from '@styled-icons/bootstrap'
+import { Pivot } from '@looker/icons'
+import { ms } from 'date-fns/locale'
+import { Results } from 'styled-icons/foundation'
+import { log } from 'console'
+
 
 // Interface for chat messages
 interface Message {
@@ -456,13 +21,16 @@ interface Message {
 
 // Define the SovrnScholar component
 export const SovrnScholar: React.FC = () => {
-  const { coreSDK } = useContext(ExtensionContext40)
+  const { coreSDK, extensionSDK } = useContext(ExtensionContext40)
   const [message, setMessage] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [userName, setUserName] = useState<string>('User') // Store the user's name
+  const [questionsVisible, setQuestionsVisible] = useState(true) // State to control collapse/expand
+  const [questions, setQuestions] = useState<{ text: string; icon: JSX.Element }[]>([]);
+  
 
   useEffect(() => {
     const getMe = async () => {
@@ -488,7 +56,12 @@ export const SovrnScholar: React.FC = () => {
     }
   }, [messages]);
 
-  const handleButtonClick = async () => {
+
+  
+
+  const handleSubmitQuestion = async () => {
+    if (!inputValue.trim()) return; // Prevent submitting empty or whitespace-only questions
+
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     // Add user message to chat
@@ -497,53 +70,48 @@ export const SovrnScholar: React.FC = () => {
       { sender: 'user', text: inputValue, name: userName, timestamp, feedback: null },
     ]);
 
+    // Hide suggested questions when a question is submitted
+    setQuestionsVisible(false);
+
     // Set loading state
     setIsLoading(true);
-
+    setInputValue('');
     try {
       // Replace this section with your Databricks logic
       const query = await coreSDK.ok(coreSDK.create_sql_query({
         "connection_name": "databricks_anayltics",
-        "sql": `SELECT ai_query('agents_business_intelligence-llm_data-v104_rag_v2', request => named_struct('messages', ARRAY(named_struct('role', 'user', 'content', '${inputValue}'))), returnType => 'STRUCT<choices:ARRAY<STRING>>')`,
+        "sql": `SELECT ai_query('agents_business_intelligence-llm_data-v111', request => named_struct('messages', ARRAY(named_struct('role', 'user', 'content', '${inputValue}'))), returnType => 'STRUCT<choices:ARRAY<STRING>>')`,
         "vis_config": {}
       }));
 
       let result = await coreSDK.ok(coreSDK.run_sql_query(query.slug, 'txt'));
 
       // Log the result to inspect its structure
-      console.log("Raw query result:", result);
+      console.log("Raw query result:", result)
 
-      // Improved JSON handling
+      console.log(typeof result) // print result type 
+      // JSON hanlding is broken only doing text parsing
+
       let resultClean = '';
-      try {
-        const parsedOuterResult = JSON.parse(result);
-        const resultParsed = JSON.parse(parsedOuterResult);
-
-        // Access the choices and clean up the response content
-        if (resultParsed.choices) {
-          resultClean = resultParsed.choices
-            .map((choice: any) => choice.message?.content || 'No content')
-            .join(' ')
-            .trim();
-        } else {
-          resultClean = 'No response available from the AI query.';
-        }
-
-      } catch (jsonError) {
-        console.warn('Failed to parse the JSON result, falling back to text handling.');
-
-        // Fallback if the response isn't valid JSON
-        resultClean = result
-        .replace(/ai_query\(.*?\)/, '')  // Remove 'ai_query(...)'
-        .replace(/STRUCT<.*?>/g, '')     // Remove 'STRUCT<...>' or similar patterns
-        .replace(/choices:.*?content:/, '') // Remove "choices:..." up to "content:"
-        .replace(/\s+/g, ' ')            // Replace multiple spaces with a single space
-        .replace(/[\[\]{}"]/g, '')       // Remove brackets, quotes, etc.
-        .trim();                         // Trim leading/trailing whitespace      
-      }
+      console.warn('Failed to parse the JSON result, falling back to text handling.');
+      resultClean = result
+        .replace(/ai_query\(.*?\)/, '')
+        .replace(/STRUCT<.*?>/g, '')
+        .replace(/choices:.*?content:/, '')
+        .replace(/\s+/g, ' ')
+        .replace(/[\[\]{}"]/g, '')
+        .replace(/choices:index:0,message:role:assistant,content:/, '')
+        .replace(/[))], >[)] /, '')
+        .replace(/\\n/g, "\n")
+        .replace(/\n/g, "\n")
+        .replace(/\)/,'') // removing first ) 
+        .trim();
+      // Fallback if the response isn't valid JSON
+      
+      console.log(resultClean)
 
       // Clean up for display
-      resultClean = resultClean || 'No meaningful response could be parsed.';
+      resultClean = resultClean || 'No meaningful response could be parsed.'
 
       // Add the system message to the chat as "Sovrn Scholar"
       setMessages((prevMessages) => [
@@ -565,8 +133,21 @@ export const SovrnScholar: React.FC = () => {
     }
 
     // Clear input value
-    setInputValue('');
+    
   };
+
+  // Handle Enter key press
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSubmitQuestion();
+    }
+  };
+  // partial solution to keyboard event depreciation
+  // document.addEventListener('keydown', function(event) {
+  //   if (event.key === 'Enter') {
+  //     handleSubmitQuestion();
+  //   }
+  // });
 
   // Handle thumbs up/down clicks
   const handleFeedback = (index: number, feedback: 'up' | 'down') => {
@@ -577,34 +158,92 @@ export const SovrnScholar: React.FC = () => {
     );
   };
 
-  // Predefined questions
-  const questions = [
+  // Larger pool of predefined questions
+  const allQuestions = [
     { text: 'What do our clients think of our Commerce Unified?', icon: <School size={30} /> },
     { text: 'What is the Sovrn Exchange?', icon: <Science size={30} /> },
     { text: 'What recommendations should I give a client who just adopted Ad Management?', icon: <ChatBubble size={30} /> },
     { text: "Are Sovrn's business priorities aligned with customer feedback?", icon: <Book size={30} /> },
+    { text: 'How do I set up a report?', icon: <Book size={30} /> },
+    { text: 'How is floor pricing handled for inventory?', icon: <Science size={30} /> },
+    { text: 'What is the preferred way for web integration?', icon: <ChatBubble size={30} /> },
+    { text: 'How often should we schedule calls to discuss progress?', icon: <School size={30} /> },
   ];
 
-  return (
-    <ComponentsProvider
-      themeCustomizations={{
-        colors: { key: '#FFD42B' }, // Change to match the new yellow color
-      }}
-    >
-      <Flex
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-        backgroundColor="#DCD6CF"
-      >
-        <Box width="80%">
-          <Heading textAlign="center" pb="medium">
-            Sovrn Scholar - {message}
-          </Heading>
+  // Function to randomly select a subset of questions
+  const getRandomQuestions = (numQuestions: number) => {
+    const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, numQuestions);
+  };
 
-          {/* Questions Buttons */}
-          <Flex justifyContent="center" alignItems="center" mb="large">
+  // Randomly select 3 questions to display
+  // const questions = getRandomQuestions(3)
+
+
+  const fetchQuestions = () => { // called on mount and when a user clicks the open questions button
+    const newQuestions = getRandomQuestions(3);
+    setQuestions(newQuestions);
+  };
+
+  useEffect(() => {
+    fetchQuestions(); // This will fetch questions on mount
+    console.log(questions)
+  }, [])
+
+  // Copy sovrn scholar response functionality 
+
+  const writeToClipboard = (message: string) => {
+    try {
+      extensionSDK.clipboardWrite(
+        message
+      )
+      console.log("copied to clipboard")
+    } catch (error) {
+      console.log("copied to clipboard has fail")
+      console.error(error)
+    }
+  }
+
+
+  return (
+ <ComponentsProvider
+  themeCustomizations={{
+    colors: { key: '#282828' }, 
+  }}
+>
+  <Flex
+    flexDirection="column"
+    justifyContent="center"
+    alignItems="center"
+    minHeight="90vh"
+    backgroundColor="#FFFFFF"
+  >
+    <Box width="75%" position="relative">
+      
+      {/* Suggested questions overlay */}
+      {questionsVisible && (
+        <Box
+          position="absolute"
+          top="50%"
+          left="50%"
+          zIndex="10"
+          backgroundColor="white"
+          p="medium"
+          borderRadius="10px"
+          style={{ 
+            transform: 'translate(-50%, -50%)',  // Center the box 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <Flex justifyContent="center" alignItems="center">
             {questions.map((q, index) => (
               <Box
                 key={index}
@@ -612,13 +251,17 @@ export const SovrnScholar: React.FC = () => {
                 m="medium"
                 width="200px"
                 height="150px"
-                backgroundColor="#FFD42B"  // Updated color
+                backgroundColor="#FFD42B"
                 borderRadius="10px"
                 display="flex"
                 flexDirection="column"
                 justifyContent="center"
                 alignItems="center"
-                onClick={() => setInputValue(q.text)}
+                onClick={() => {
+                  setInputValue(q.text);
+                  handleSubmitQuestion(); // Submit the question directly
+                  setQuestionsVisible(false); // Collapse questions on click
+                }}
                 style={{ cursor: 'pointer' }}
               >
                 {q.icon}
@@ -634,75 +277,124 @@ export const SovrnScholar: React.FC = () => {
               </Box>
             ))}
           </Flex>
-
-          {/* Message history display */}
-          <Box mb="large" height="300px" overflowY="auto" backgroundColor="white" borderRadius="8px" p="medium">
-            {messages.map((msg, index) => (
-              <Box
-                key={index}
-                p="medium"
-                mb="small"
-                borderRadius="8px"
-                width="60%"
-                ml={msg.sender === 'user' ? 'auto' : 0}
-                mr={msg.sender === 'user' ? 0 : 'auto'}
-                backgroundColor={msg.sender === 'user' ? '#FFD42B' : '#D3D3D3'} // User message: gold, System: grey
-                color="black"
-                textAlign={msg.sender === 'user' ? 'right' : 'left'}
-              >
-                {/* Display the name and timestamp above the message */}
-                  <Text fontWeight="bold" fontSize="small" mb="xsmall">{msg.name} - {msg.timestamp}</Text>
-               <Text fontWeight="medium" fontSize="medium" mt="xsmall">{msg.text}</Text>
-
-                {/* Thumbs up/down buttons for system responses */}
-                {msg.sender === 'system' && (
-                  <Flex justifyContent="flex-end" mt="small">
-                    <IconButton
-                      icon={<ThumbUp size={24} />}
-                      label="Thumbs Up"
-                      onClick={() => handleFeedback(index, 'up')}
-                      disabled={msg.feedback !== null}
-                      size="medium"
-                    />
-                    <IconButton
-                      icon={<ThumbDown size={24} />}
-                      label="Thumbs Down"
-                      onClick={() => handleFeedback(index, 'down')}
-                      disabled={msg.feedback !== null}
-                      ml="small"
-                      size="medium"
-                    />
-                  </Flex>
-                )}
-
-                {/* Display feedback if already provided */}
-                {msg.feedback && (
-                  <Text fontSize="small" mt="small">
-                    {msg.feedback === 'up' ? 'You liked this response' : 'You disliked this response'}
-                  </Text>
-                )}
-              </Box>
-            ))}
-            <div ref={messagesEndRef} />
-          </Box>
-
-          {/* Input box and button */}
-          <Box mb="medium">
-            <InputText
-              placeholder="Type your important question here..."
-              width="100%"
-              value={inputValue}
-              onChange={handleInputChange}
-            />
-          </Box>
-
-          <Box textAlign="center">
-            <Button color="key" onClick={handleButtonClick} disabled={isLoading}>
-              {isLoading ? 'Processing...' : 'Ask the Scholar'}
+          {/* Toggle button to hide suggested questions */}
+          <Box textAlign="center" mt="medium">
+            <Button onClick={() => setQuestionsVisible(false)}>
+              Hide Suggested Questions
             </Button>
           </Box>
         </Box>
+      )}
+
+      {/* Message history display */}
+      <Box
+        mb="medium"
+        overflowY="auto"
+        minHeight="80vh"
+        maxHeight="80vh"
+        backgroundColor="white"
+        borderRadius="8px"
+        p="medium"
+        position="relative"
+      >
+        {messages.map((msg, index) => (
+          <Box
+            key={index}
+            p="medium"
+            mb="small"
+            borderRadius="8px"
+            width="70%"
+            ml={msg.sender === 'user' ? 'auto' : 0}
+            mr={msg.sender === 'user' ? 0 : 'auto'}
+            backgroundColor={msg.sender === 'user' ? '#FFD42B' : '#D3D3D3'}
+            color="#282828"
+            textAlign={msg.sender === 'user' ? 'right' : 'left'}
+          >
+            {/* Display the name and timestamp above the message */}
+            <Box textAlign={msg.sender === 'user' ? 'right' : 'left'}>
+              <Text fontWeight="bold" fontSize="small" mb="xsmall" color="rgba(0, 0, 0, 0.5)">
+                {msg.name} - {msg.timestamp}
+              </Text>
+            </Box>
+            <Text  fontSize="small" mb="small" style={{ whiteSpace: "pre-line" }}>
+              {msg.text}
+            </Text>
+            {/* Thumbs up/down buttons for system responses */}
+            {msg.sender === 'system' && (
+            <Flex justifyContent="flex-end" mt="small">
+              <IconButton
+                icon={<Clipboard size={24} />}
+                label="Copy Response"
+                onClick={() => writeToClipboard(msg.text)}
+                size="medium"
+                mr="small"
+              />
+              <IconButton
+                icon={<ThumbUp size={24} />}
+                label="Thumbs Up"
+                onClick={() => handleFeedback(index, 'up')}
+                disabled={msg.feedback !== null}
+                size="medium"
+                ml="xsmall"  
+              />
+              <IconButton
+                icon={<ThumbDown size={24} />}
+                label="Thumbs Down"
+                onClick={() => handleFeedback(index, 'down')}
+                disabled={msg.feedback !== null}
+                ml="xsmall"  
+                size="medium"
+              />
+            </Flex>
+            )}
+
+            {/* Display feedback if already provided */}
+            {msg.feedback && (
+              <Text fontSize="small" mt="small">
+                {msg.feedback === 'up' ? 'You liked this response' : 'You disliked this response'}
+              </Text>
+            )}
+          </Box>
+        ))}
+        <div ref={messagesEndRef} />
+      </Box>
+
+      {/* Input box and send question button together */}
+      <Flex mb="large" justifyContent="center" alignItems="center" width="100%">
+        <Box position="relative" width="100%">
+          <InputText
+            placeholder="Type your important question here..."
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress} // Add Enter key submission
+            pr="50px" // Add padding to the right to make space for the button
+          />
+          <IconButton
+            icon={isLoading ? <StopCircleFill size={24} color="red" /> : <Send size={24} color="key" />}
+            label="Send Prompt"
+            onClick={handleSubmitQuestion}
+            disabled={isLoading}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          />
+        </Box>
+        
       </Flex>
-    </ComponentsProvider>
+
+      {/* Show suggested questions button placed under the input box */}
+      <Box textAlign="center" mb="medium">
+        <IconButton
+          icon={< PatchQuestionFill size={48} />}  
+          label="Show Suggested Questions"
+          onClick={() => {fetchQuestions(); setQuestionsVisible(true)}}
+        />
+      </Box>
+    </Box>
+  </Flex>
+</ComponentsProvider>
   );
 };
